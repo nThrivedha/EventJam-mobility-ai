@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EventJam — Bangalore Smart Mobility</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --card: #1a1a24;
+    --accent: #f0c040;
+    --red: #ff4d4d;
+    --green: #4dff91;
+    --orange: #ff8c42;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --border: #2a2a38;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -40%;
+    left: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(240,192,64,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    padding: 2rem 2rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+  }
+  .logo-text h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+  }
+  .logo-text p {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  .live-badge {
+    margin-left: auto;
+    background: rgba(255,77,77,0.15);
+    border: 1px solid var(--red);
+    color: var(--red);
+    font-size: 0.65rem;
+    font-family: 'Space Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .live-dot {
+    width: 6px; height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .input-group {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+  .input-group:focus-within { border-color: var(--accent); }
+  .input-group label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .input-group input, .input-group select {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .input-group select option { background: var(--card); }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  .btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-bottom: 2rem;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(240,192,64,0.25); }
+  .btn:active { transform: translateY(0); }
+
+  /* Results */
+  #results { display: none; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .alert-card {
+    border-radius: 14px;
+    padding: 1.4rem;
+    margin-bottom: 1rem;
+    border: 1px solid;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .alert-card.red { background: rgba(255,77,77,0.08); border-color: rgba(255,77,77,0.3); }
+  .alert-card.yellow { background: rgba(255,140,66,0.08); border-color: rgba(255,140,66,0.3); }
+  .alert-card.green { background: rgba(77,255,145,0.08); border-color: rgba(77,255,145,0.3); }
+  .alert-icon { font-size: 1.8rem; line-height: 1; }
+  .alert-title { font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+  .alert-card.red .alert-title { color: var(--red); }
+  .alert-card.yellow .alert-title { color: var(--orange); }
+  .alert-card.green .alert-title { color: var(--green); }
+  .alert-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  .rec-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  .rec-box h3 {
+    font-size: 0.65rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .rec-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .rec-item:last-child { border-bottom: none; }
+  .rec-emoji { font-size: 1.3rem; width: 32px; text-align: center; }
+  .rec-text { flex: 1; font-size: 0.88rem; }
+  .rec-text strong { display: block; font-weight: 700; margin-bottom: 2px; }
+  .rec-text span { color: var(--muted); font-size: 0.78rem; }
+  .rec-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+  }
+  .tag-best { background: rgba(77,255,145,0.15); color: var(--green); }
+  .tag-avoid { background: rgba(255,77,77,0.15); color: var(--red); }
+  .tag-ok { background: rgba(255,140,66,0.15); color: var(--orange); }
+
+  .events-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  .events-box h3 {
+    font-size: 0.65rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .event-item {
+    display: flex;
+    gap: 0.8rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    align-items: center;
+  }
+  .event-item:last-child { border-bottom: none; }
+  .event-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+
+  .depart-box {
+    background: linear-gradient(135deg, rgba(240,192,64,0.12), rgba(240,192,64,0.04));
+    border: 1px solid rgba(240,192,64,0.3);
+    border-radius: 14px;
+    padding: 1.4rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  .depart-box .label { font-size: 0.7rem; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .depart-time { font-size: 2rem; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
+  .depart-reason { font-size: 0.82rem; color: var(--muted); }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🗓️</div>
+  <div class="logo-text">
+    <h1>EventJam</h1>
+    <p>Event-aware congestion intelligence · Bangalore</p>
+  </div>
+  <div class="live-badge"><div class="live-dot"></div> LIVE</div>
+</header>
+
+<main>
+  <div class="section-label">Plan Your Commute</div>
+
+  <div class="input-group">
+    <label>FROM</label>
+    <input type="text" id="from" placeholder="e.g. Koramangala" />
+  </div>
+
+  <div class="input-group">
+    <label>TO</label>
+    <input type="text" id="to" placeholder="e.g. Whitefield" />
+  </div>
+
+  <div class="row">
+    <div class="input-group" style="margin-bottom:0">
+      <label>DEPARTURE TIME</label>
+      <input type="time" id="time" value="18:00" />
+    </div>
+    <div class="input-group" style="margin-bottom:0">
+      <label>NEAR AREA</label>
+      <select id="area">
+        <option value="mg_road">MG Road / Cubbon Park</option>
+        <option value="chinnaswamy">Chinnaswamy / Shivajinagar</option>
+        <option value="outer_ring">Outer Ring Road</option>
+        <option value="koramangala">Koramangala / BTM</option>
+        <option value="electronic_city">Electronic City</option>
+        <option value="whitefield">Whitefield / ITPL</option>
+      </select>
+    </div>
+  </div>
+  <br/>
+
+  <button class="btn" onclick="analyze()">⚡ Analyze My Commute</button>
+
+  <div id="results">
+    <div id="alert-container"></div>
+    <div id="events-container"></div>
+    <div id="depart-container"></div>
+    <div id="rec-container"></div>
+  </div>
+</main>
+
+<footer>EventJam · Smart Mobility Intelligence · Built for PromptWars × DSU 2026</footer>
+
+<script>
+const EVENTS = {
+  mg_road: [
+    { name: "Cubbon Park Cultural Fest", time: "5PM–9PM", impact: "high", emoji: "🎭" },
+    { name: "Commercial Street Sale Event", time: "4PM–8PM", impact: "medium", emoji: "🛍️" },
+  ],
+  chinnaswamy: [
+    { name: "IPL: RCB vs CSK", time: "7:30PM", impact: "high", emoji: "🏏" },
+    { name: "Pre-match crowd buildup", time: "5PM–7PM", impact: "high", emoji: "🚶" },
+  ],
+  outer_ring: [
+    { name: "IT Park shift change (6PM)", time: "5:45PM–7PM", impact: "high", emoji: "💼" },
+  ],
+  koramangala: [
+    { name: "Koramangala Food Festival", time: "6PM–11PM", impact: "medium", emoji: "🍜" },
+    { name: "BIC Startup Pitch Night", time: "7PM–9PM", impact: "low", emoji: "🚀" },
+  ],
+  electronic_city: [
+    { name: "Infosys / Wipro shift end", time: "6PM–7:30PM", impact: "high", emoji: "🏢" },
+  ],
+  whitefield: [
+    { name: "Phoenix Mall Weekend Rush", time: "5PM–10PM", impact: "medium", emoji: "🏬" },
+    { name: "ITPL Tech Park exit rush", time: "6PM–8PM", impact: "high", emoji: "💻" },
+  ]
+};
+
+const MODES = [
+  { emoji: "🚇", name: "Namma Metro", desc: "Fastest during events — bypass road jams entirely", tag: "tag-best" },
+  { emoji: "🛺", name: "Auto Rickshaw", desc: "Can navigate lanes, but avoid event zones", tag: "tag-ok" },
+  { emoji: "🚌", name: "BMTC Bus", desc: "Avoid if passing near event venue", tag: "tag-avoid" },
+  { emoji: "🚗", name: "Personal Car / Cab", desc: "High congestion risk near event. Add 45–60 min buffer", tag: "tag-avoid" },
+];
+
+function getImpactLevel(events, hour) {
+  const highCount = events.filter(e => e.impact === "high").length;
+  if (highCount >= 2) return "high";
+  if (highCount === 1) return "medium";
+  return "low";
+}
+
+function getBestDepartTime(hour, impact) {
+  if (impact === "high") {
+    if (hour >= 17 && hour <= 20) return { time: "Before 4:30 PM or after 9:00 PM", reason: "Major event detected — peak jam window is 5PM–9PM" };
+    return { time: `${hour}:00 PM as planned`, reason: "You're outside the peak event window" };
+  }
+  if (impact === "medium") {
+    return { time: `Before ${hour}:00 or leave late`, reason: "Moderate congestion expected due to nearby events" };
+  }
+  return { time: "Anytime — no major disruptions", reason: "No major events detected near your route" };
+}
+
+function analyze() {
+  const from = document.getElementById('from').value || "Your Location";
+  const to = document.getElementById('to').value || "Destination";
+  const timeVal = document.getElementById('time').value;
+  const area = document.getElementById('area').value;
+  const hour = parseInt(timeVal.split(':')[0]);
+
+  const events = EVENTS[area] || [];
+  const impact = getImpactLevel(events, hour);
+  const depart = getBestDepartTime(hour, impact);
+
+  // Alert
+  const alertMap = {
+    high: { cls: 'red', icon: '🚨', title: 'HIGH CONGESTION RISK', desc: `Major events detected near your route from ${from} to ${to}. Expect 45–75 min delays on main roads. Google Maps won't warn you about this.` },
+    medium: { cls: 'yellow', icon: '⚠️', title: 'MODERATE DISRUPTION', desc: `Events nearby will increase traffic. Add 20–30 min buffer for ${from} → ${to}.` },
+    low: { cls: 'green', icon: '✅', title: 'ROUTE LOOKS CLEAR', desc: `No major events detected near ${from} → ${to}. Normal commute time expected.` },
+  };
+  const a = alertMap[impact];
+  document.getElementById('alert-container').innerHTML = `
+    <div class="alert-card ${a.cls}">
+      <div class="alert-icon">${a.icon}</div>
+      <div>
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-desc">${a.desc}</div>
+      </div>
+    </div>`;
+
+  // Events
+  const impactColors = { high: '#ff4d4d', medium: '#ff8c42', low: '#4dff91' };
+  const eventsHtml = events.map(e => `
+    <div class="event-item">
+      <div class="event-dot" style="background:${impactColors[e.impact]}"></div>
+      <span>${e.emoji} <strong>${e.name}</strong> — ${e.time}</span>
+    </div>`).join('') || '<div class="event-item">No events detected in this area today.</div>';
+
+  document.getElementById('events-container').innerHTML = `
+    <div class="events-box">
+      <h3>📍 Events Near Route</h3>
+      ${eventsHtml}
+    </div>`;
+
+  // Depart
+  document.getElementById('depart-container').innerHTML = `
+    <div class="depart-box">
+      <div class="label">Recommended Departure</div>
+      <div class="depart-time">${depart.time}</div>
+      <div class="depart-reason">${depart.reason}</div>
+    </div>`;
+
+  // Modes
+  const modesHtml = MODES.map(m => `
+    <div class="rec-item">
+      <div class="rec-emoji">${m.emoji}</div>
+      <div class="rec-text">
+        <strong>${m.name}</strong>
+        <span>${m.desc}</span>
+      </div>
+      <span class="rec-tag ${m.tag}">${m.tag === 'tag-best' ? 'BEST' : m.tag === 'tag-avoid' ? 'AVOID' : 'OK'}</span>
+    </div>`).join('');
+
+  document.getElementById('rec-container').innerHTML = `
+    <div class="rec-box">
+      <h3>🚦 Transport Recommendations</h3>
+      ${modesHtml}
+    </div>`;
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
