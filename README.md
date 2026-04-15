@@ -50,7 +50,7 @@ It helps users make smarter decisions by providing:
 
 ## 🌐 Demo
 
-👉 *(Add your GitHub Pages link here)*
+👉 https://nthrivedha.github.io/EventJam-mobility-ai/
 
 ---
 
