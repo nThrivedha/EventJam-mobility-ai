@@ -50,7 +50,7 @@ It helps users make smarter decisions by providing:
 
 ## 🌐 Demo
 
-👉 https://nthrivedha.github.io/EventJam-mobility-ai/
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20App-Click%20Here-f0c040?style=for-the-badge&logo=google-chrome&logoColor=black)](https://nThrivedha.github.io/EventJam-mobility-ai/)
 
 ---
 
